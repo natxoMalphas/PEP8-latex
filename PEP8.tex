@@ -1,0 +1,1283 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{listings}
+\usepackage{pythonhighlight}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{hyperref}
+\DisableLigatures{encoding = *, family = * }
+\title{PEP 8 – Style Guide for python Code}
+\author{Guido van Rossum, Barry Warsaw, Alyssa Coghlan}
+\date{05-Jul-2001}
+\begin{document}
+\lstset{language=Python, frame=single, breaklines=true, framerule=0.6pt}
+\maketitle
+\tableofcontents
+\pagebreak
+\section{Introduction}
+This document gives coding conventions for the python code comprising the 
+standard library in the main python distribution. Please see the companion
+informational PEP describing
+\href{https://peps.python.org/pep-0007/}{style guidelines for the C code in the
+C implementation of python}.
+\par
+This document and
+\href{https://peps.python.org/pep-0257/}{PEP 257}
+(Docstring Conventions) were adapted from Guido’s
+original python Style Guide essay, with some additions from Barry’s style
+guide~\cite{Warsaw-Style}.
+\par
+This style guide evolves over time as additional conventions are identified and
+past conventions are rendered obsolete by changes in the language itself.
+\par
+Many projects have their own coding style guidelines. In the event of any
+conflicts, such project-specific guides take precedence for that project.
+\par
+\section{A Foolish Consistency is the Hobgoblin of Little Minds}
+One of Guido’s key insights is that code is read much more often than it is
+written. The guidelines provided here are intended to improve the readability
+of code and make it consistent across the wide spectrum of python code. As PEP
+20 says, “Readability counts”.
+\par
+A style guide is about consistency. Consistency with this style guide is
+important. Consistency within a project is more important. Consistency within
+one module or function is the most important.
+\par
+However, know when to be inconsistent – sometimes style guide recommendations
+just aren’t applicable. When in doubt, use your best judgment. Look at other
+examples and decide what looks best. And don’t hesitate to ask!
+\par
+In particular: do not break backwards compatibility just to comply with this
+PEP!
+\par
+Some other good reasons to ignore a particular guideline:
+%
+\begin{enumerate}
+\item When applying the guideline would make the code less readable, even for
+someone who is used to reading code that follows this PEP.
+\item To be consistent with surrounding code that also breaks it (maybe for
+historic reasons) – although this is also an opportunity to clean up someone
+else’s mess (in true XP style).
+\item Because the code in question predates the introduction of the guideline
+and there is no other reason to be modifying that code.
+\item When the code needs to remain compatible with older versions of python
+that don’t support the feature recommended by the style guide.
+\end{enumerate}
+%
+\section{Code Lay-out}
+\subsection{Indentation}
+Use 4 spaces per indentation level.
+\par
+Continuation lines should align wrapped elements either vertically using
+python’s implicit line joining inside parentheses, 
+brackets and braces, or using a {\it hanging indent}.\footnote{{\it Hanging
+indentation} is a type-setting style where all the lines in a paragraph are
+indented except the first line. In the context of python, the term is used to
+describe a style where the opening parenthesis of a parenthesized statement is
+the last non-whitespace character of the line, with subsequent lines being
+indented until the closing parenthesis.} When using a hanging indent the
+following should be considered; there should be no arguments on the first line
+and further indentation should be used to clearly distinguish itself as a
+continuation line:
+\par
+\begin{python}
+# Correct:
+
+# Aligned with opening delimiter.
+foo = long_function_name(var_one, var_two,
+                         var_three, var_four)
+
+# Add 4 spaces (an extra level of indentation) to distinguish
+# arguments from the rest.
+def long_function_name(
+        var_one, var_two, var_three,
+        var_four):
+    print(var_one)
+
+# Hanging indents should add a level.
+foo = long_function_name(
+    var_one, var_two,
+    var_three, var_four)
+\end{python}
+\begin{python}
+# Wrong:
+
+# Arguments on first line forbidden when not using vertical alignment.
+foo = long_function_name(var_one, var_two,
+    var_three, var_four)
+
+# Further indentation required as indentation is not distinguishable.
+def long_function_name(
+    var_one, var_two, var_three,
+    var_four):
+    print(var_one)
+\end{python}
+The 4-space rule is optional for continuation lines.
+\par
+Optional:
+\par
+\begin{python}
+# Hanging indents *may* be indented to other than 4 spaces.
+foo = long_function_name(
+    var_one, var_two,
+    var_three, var_four)
+\end{python}
+\par
+When the conditional part of an if-statement is long enough to require that it
+be written across multiple lines, it’s worth noting that the combination of a
+two character keyword (i.e. if), plus a single space, plus an opening
+parenthesis creates a natural 4-space indent for the subsequent lines of the
+multiline conditional. This can produce a visual conflict with the indented
+suite of code nested inside the if-statement, which would also naturally be
+indented to 4 spaces. This PEP takes no explicit position on how (or whether) to
+further visually distinguish such conditional lines from the nested suite inside
+the if-statement. Acceptable options in this situation include, but are not
+limited to:
+\par
+\begin{python}
+# No extra indentation.
+if (this_is_one_thing and
+    that_is_another_thing):
+    do_something()
+
+# Add a comment, which will provide some distinction in editors
+# supporting syntax highlighting.
+if (this_is_one_thing and
+    that_is_another_thing):
+    # Since both conditions are true, we can frobnicate.
+    do_something()
+
+# Add some extra indentation on the conditional continuation line.
+if (this_is_one_thing
+        and that_is_another_thing):
+    do_something()
+\end{python}
+(Also see the discussion of whether to break before or after binary operators
+below.)
+\par
+The closing brace/bracket/parenthesis on multiline constructs may either line up
+under the first non-whitespace character of the last line of list, as in:
+\par
+\begin{python}
+my_list = [
+    1, 2, 3,
+    4, 5, 6,
+]
+result = some_function_that_takes_arguments(
+    'a', 'b', 'c',
+    'd', 'e', 'f',
+)
+\end{python}
+\subsection{Tabs or Spaces?}
+Spaces are the preferred indentation method.
+\par
+Tabs should be used solely to remain consistent with code that is already
+indented with tabs.
+\par
+Python disallows mixing tabs and spaces for indentation.
+\par
+\subsection{Maximun Line Length}
+Limit all lines to a maximum of 79 characters.
+\par
+For flowing long blocks of text with fewer structural restrictions (docstrings
+or comments), the line length should be limited to 72 characters.
+\par
+Limiting the required editor window width makes it possible to have several
+files open side by side, and works well when using code review tools that
+present the two versions in adjacent columns.
+\par
+The default wrapping in most tools disrupts the visual structure of the code,
+making it more difficult to understand. The limits are chosen to avoid wrapping
+in editors with the window width set to 80, even if the tool places a marker
+glyph in the final column when wrapping lines. Some web based tools may not
+offer dynamic line wrapping at all.
+\par
+Some teams strongly prefer a longer line length. For code maintained exclusively
+or primarily by a team that can reach agreement on this issue, it is okay to
+increase the line length limit up to 99 characters, provided that comments and
+docstrings are still wrapped at 72 characters.
+\par
+The Python standard library is conservative and requires limiting lines to 79
+characters (and docstrings/comments to 72).
+\par
+The preferred way of wrapping long lines is by using Python’s implied line
+continuation inside parentheses, brackets and braces. Long lines can be broken
+over multiple lines by wrapping expressions in parentheses. These should be used
+in preference to using a backslash for line continuation.
+\par
+Backslashes may still be appropriate at times. For example, long, multiple
+with-statements could not use implicit continuation before Python 3.10, so
+backslashes were acceptable for that case:
+\par
+\begin{python}
+with open('/path/to/some/file/you/want/to/read') as file_1, \
+     open('/path/to/some/file/being/written', 'w') as file_2:
+    file_2.write(file_1.read())
+\end{python}
+(See the previous discussion on multiline if-statements for further thoughts on
+the indentation of such multiline with-statements.)
+\par
+Another such case is with assert statements.
+\par
+Make sure to indent the continued line appropriately.
+\par
+\subsection{Should a Line Break Before or After a Binary Operator?}
+For decades the recommended style was to break after binary operators. But this
+can hurt readability in two ways: the operators tend to get scattered across
+different columns on the screen, and each operator is moved away from its
+operand and onto the previous line. Here, the eye has to do extra work to tell
+which items are added and which are subtracted:
+\par
+\begin{python}
+# Wrong:
+# operators sit far away from their operands
+income = (gross_wages +
+          taxable_interest +
+          (dividends - qualified_dividends) -
+          ira_deduction -
+          student_loan_interest)
+\end{python}
+To solve this readability problem, mathematicians and their publishers follow
+the opposite convention. Donald Knuth explains the traditional rule in his
+{\it Computers and Typesetting} series: “Although formulas within a paragraph
+always break after binary operations and relations, displayed formulas always
+break before binary operations”~\cite{Knuth-1986}
+\par
+Following the tradition from mathematics usually results in more readable code:
+\par
+\begin{python}
+# Correct:
+# easy to match operators with operands
+income = (gross_wages
+          + taxable_interest
+          + (dividends - qualified_dividends)
+          - ira_deduction
+          - student_loan_interest)
+\end{python}
+In Python code, it is permissible to break before or after a binary operator, as
+long as the convention is consistent locally. For new code Knuth’s style is
+suggested.
+\par
+\subsection{Blank Lines}
+Surround top-level function and class definitions with two blank lines.
+\par
+Method definitions inside a class are surrounded by a single blank line.
+\par
+Extra blank lines may be used (sparingly) to separate groups of related
+functions. Blank lines may be omitted between a bunch of related one-liners
+(e.g. a set of dummy implementations).
+\par
+Use blank lines in functions, sparingly, to indicate logical sections.
+\par
+Python accepts the control-L (i.e. \textasciicircum L) form feed character as
+whitespace; many tools treat these characters as page separators, so you may use
+them to separate pages of related sections of your file. Note, some editors and
+web-based code viewers may not recognize control-L as a form feed and will show
+another glyph in its place.
+\par
+\subsection{Source File Encoding}
+Code in the core Python distribution should always use UTF-8, and should not
+have an encoding declaration.
+\par
+In the standard library, non-UTF-8 encodings should be used only for test
+purposes. Use non-ASCII characters sparingly, preferably only to denote places
+and human names. If using non-ASCII characters as data, avoid noisy Unicode
+characters like  and byte order marks.
+\par
+All identifiers in the Python standard library MUST use ASCII-only identifiers,
+and SHOULD use English words wherever feasible (in many cases, abbreviations and
+technical terms are used which aren’t English).
+\par
+Open source projects with a global audience are encouraged to adopt a similar
+policy.
+\par
+\subsection{Imports}
+Imports should usually be on separate lines:
+\par
+\begin{python}
+# Correct:
+import os
+import sys
+\end{python}
+\begin{python}
+# Wrong:
+import sys, os
+\end{python}
+It’s okay to say this though:
+\par
+\begin{python}
+# Correct:
+from subprocess import Popen, PIPE
+\end{python}
+Imports are always put at the top of the file, just after any module comments
+and docstrings, and before module globals and constants.
+\par
+Imports should be grouped in the following order:
+\begin{enumerate}
+\item Standard library imports.
+\item Related third party imports.
+\item Local application/library specific imports.
+\end{enumerate}
+You should put a blank line between each group of imports.
+\par
+Absolute imports are recommended, as they are usually more readable and tend to
+be better behaved (or at least give better error messages) if the import system
+is incorrectly configured (such as when a directory inside a package ends up on
+sys.path):
+\par
+\begin{python}
+import mypkg.sibling
+from mypkg import sibling
+from mypkg.sibling import example
+\end{python}
+However, explicit relative imports are an acceptable alternative to absolute
+imports, especially when dealing with complex package layouts where using
+absolute imports would be unnecessarily verbose:
+\par
+\begin{python}
+from . import sibling
+from .sibling import example
+\end{python}
+Standard library code should avoid complex package layouts and always use
+absolute imports.
+\par
+When importing a class from a class-containing module, it’s usually okay to
+spell this:
+\par
+\begin{python}
+from myclass import MyClass
+from foo.bar.yourclass import YourClass
+\end{python}
+If this spelling causes local name clashes, then spell them explicitly:
+\par
+\begin{python}
+import myclass
+import foo.bar.yourclass
+\end{python}
+and use myclass.MyClass and foo.bar.yourclass.YourClass.
+\par
+Wildcard imports (\verb"from <module> import *") should be avoided, as they 
+make it unclear which names are present in the namespace, confusing both 
+readers and many automated tools. There is one defensible use case for a 
+wildcard import, which is to republish an internal interface as part of a 
+public API (for example, overwriting a pure Python implementation of an 
+interface with the definitions from an optional accelerator module and 
+exactly which definitions will be overwritten isn’t known in advance).
+\par
+When republishing names this way, the guidelines below regarding public and
+internal interfaces still apply.
+\par
+\subsection{Module Level Dunder Names}
+Module level “dunders” (i.e. names with two leading and two trailing 
+underscores) such as \verb"__all__", \verb"__author__", \verb"__version__", 
+etc. should be placed after the module docstring but before any import 
+statements except from \verb"__future__" imports. Python mandates that 
+future-imports must appear in the module before any other code except 
+docstrings:
+\par
+\begin{python}
+"""This is the example module.
+
+This module does stuff.
+"""
+
+from __future__ import barry_as_FLUFL
+
+__all__ = ['a', 'b', 'c']
+__version__ = '0.1'
+__author__ = 'Cardinal Biggles'
+
+import os
+import sys
+\end{python}
+\section{String Quotes}
+In Python, single-quoted strings and double-quoted strings are the same. This 
+PEP does not make a recommendation for this. Pick a rule and stick to it. 
+When a string contains single or double quote characters, however, use the 
+other one to avoid backslashes in the string. It improves readability.
+\par
+For triple-quoted strings, always use double quote characters to be 
+consistent with the docstring convention in
+\href{https://peps.python.org/pep-0257/}{PEP 257}
+\section{Whitespace in Expressions and Statements}
+\subsection{Pet Peeves}
+Avoid extraneous whitespace in the following situations:
+\par
+\begin{itemize}
+\item Immediately inside parentheses, brackets or braces:
+\begin{python}
+# Correct:
+spam(ham[1], {eggs: 2})
+\end{python}
+\begin{python}
+# Wrong:
+spam( ham[ 1 ], { eggs: 2 } )
+\end{python}
+\item Between a trailing comma and a following close parenthesis:
+\begin{python}
+# Correct:
+foo = (0,)
+\end{python}
+\begin{python}
+# Wrong:
+bar = (0, )
+\end{python}
+\item Immediately before a comma, semicolon, or colon:
+\begin{python}
+# Correct:
+if x == 4: print(x, y); x, y = y, x
+\end{python}
+\begin{python}
+# Wrong:
+if x == 4 : print(x , y) ; x , y = y , x
+\end{python}
+\item However, in a slice the colon acts like a binary operator, and should
+have equal amounts on either side (treating it as the operator with the lowest
+priority). In an extended slice, both colons must have the same amount of
+spacing applied. Exception: when a slice parameter is omitted, the space is
+omitted:
+\begin{python}
+# Correct:
+ham[1:9], ham[1:9:3], ham[:9:3], ham[1::3], ham[1:9:]
+ham[lower:upper], ham[lower:upper:], ham[lower::step]
+ham[lower+offset : upper+offset]
+ham[: upper_fn(x) : step_fn(x)], ham[:: step_fn(x)]
+ham[lower + offset : upper + offset]
+\end{python}
+\begin{python}
+# Wrong:
+ham[lower + offset:upper + offset]
+ham[1: 9], ham[1 :9], ham[1:9 :3]
+ham[lower : : step]
+ham[ : upper]
+\end{python}
+\item Immediately before the open parenthesis that starts the argument list of
+a function call:
+\begin{python}
+# Correct:
+spam(1)
+\end{python}
+\begin{python}
+# Wrong:
+spam (1)
+\end{python}
+\item Immediately before the open parenthesis that starts an indexing or
+slicing:
+\begin{python}
+# Correct:
+dct['key'] = lst[index]
+\end{python}
+\begin{python}
+# Wrong:
+dct ['key'] = lst [index]
+\end{python}
+\item More than one space around an assignment (or other) operator to align it
+with another:
+\begin{python}
+# Correct:
+x = 1
+y = 2
+long_variable = 3
+\end{python}
+\begin{python}
+# Wrong:
+x             = 1
+y             = 2
+long_variable = 3
+\end{python}
+\end{itemize}
+\subsection{Other Recommendations}
+\begin{itemize}
+\item Avoid trailing whitespace anywhere. Because it’s usually invisible, it can
+be confusing: e.g. a backslash followed by a space and a newline does not count
+as a line continuation marker. Some editors don’t preserve it and many projects
+(like CPython itself) have pre-commit hooks that reject it.
+\item Always surround these binary operators with a single space on either side:
+assignment (=), augmented assignment (+=, -= etc.), comparisons (==, <, >, !=, <>,
+<=, >=, in, not in, is, is not), Booleans (and, or, not).
+\item If operators with different priorities are used, consider adding whitespace
+around the operators with the lowest priority(ies). Use your own judgment;
+however, never use more than one space, and always have the same amount of
+whitespace on both sides of a binary operator:
+\begin{python}
+# Correct:
+i = i + 1
+submitted += 1
+x = x*2 - 1
+hypot2 = x*x + y*y
+c = (a+b) * (a-b)
+\end{python}
+\begin{python}
+# Wrong:
+i=i+1
+submitted +=1
+x = x * 2 - 1
+hypot2 = x * x + y * y
+c = (a + b) * (a - b)
+\end{python}
+\item Function annotations should use the normal rules for colons and always
+have spaces around the -> arrow if present.
+(See \hyperref[sec:function_annotations]{Function Annotations} below for more
+about function annotations.):
+\begin{python}
+# Correct:
+def munge(input: AnyStr): ...
+def munge() -> PosInt: ...
+\end{python}
+\begin{python}
+# Wrong:
+def munge(input:AnyStr): ...
+def munge()->PosInt: ...
+\end{python}
+\item Don’t use spaces around the = sign when used to indicate a keyword
+argument, or when used to indicate a default value for an unannotated function
+parameter:
+\begin{python}
+# Correct:
+def complex(real, imag=0.0):
+    return magic(r=real, i=imag)
+\end{python}
+\begin{python}
+# Wrong:
+def complex(real, imag = 0.0):
+    return magic(r = real, i = imag)
+\end{python}
+When combining an argument annotation with a default value, however, do use
+spaces around the = sign:
+\begin{python}
+# Correct:
+def munge(sep: AnyStr = None): ...
+def munge(input: AnyStr, sep: AnyStr = None, limit=1000): ...
+\end{python}
+\begin{python}
+# Wrong:
+def munge(input: AnyStr=None): ...
+def munge(input: AnyStr, limit = 1000): ...
+\end{python}
+\item Compound statements (multiple statements on the same line) are generally
+discouraged:
+\begin{python}
+# Correct:
+if foo == 'blah':
+    do_blah_thing()
+do_one()
+do_two()
+do_three()
+\end{python}
+Rather not:
+\begin{python}
+# Wrong:
+if foo == 'blah': do_blah_thing()
+do_one(); do_two(); do_three()
+\end{python}
+\item While sometimes it’s okay to put an if/for/while with a small body on the
+same line, never do this for multi-clause statements. Also avoid folding such
+long lines!
+\par
+Rather not:
+\begin{python}
+# Wrong:
+if foo == 'blah': do_blah_thing()
+for x in lst: total += x
+while t < 10: t = delay()
+\end{python}
+Definitely not:
+\begin{python}
+# Wrong:
+if foo == 'blah': do_blah_thing()
+else: do_non_blah_thing()
+
+try: something()
+finally: cleanup()
+
+do_one(); do_two(); do_three(long, argument,
+                             list, like, this)
+
+if foo == 'blah': one(); two(); three()
+\end{python}
+\end{itemize}
+\section{When to Use Tralling Commas}
+Trailing commas are usually optional, except they are mandatory when making a 
+tuple of one element. For clarity, it is recommended to surround the latter 
+in (technically redundant) parentheses:
+\par
+\begin{python}
+# Correct:
+FILES = ('setup.cfg',)
+\end{python}
+\begin{python}
+# Wrong:
+FILES = 'setup.cfg',
+\end{python}
+When trailing commas are redundant, they are often helpful when a version 
+control system is used, when a list of values, arguments or imported items is 
+expected to be extended over time. The pattern is to put each value (etc.) on 
+a line by itself, always adding a trailing comma, and add the close 
+parenthesis/bracket/brace on the next line. However it does not make sense to 
+have a trailing comma on the same line as the closing delimiter (except in 
+the above case of singleton tuples):
+\par
+\begin{python}
+# Correct:
+FILES = [
+    'setup.cfg',
+    'tox.ini',
+    ]
+initialize(FILES,
+           error=True,
+           )
+\end{python}
+\begin{python}
+# Wrong:
+FILES = ['setup.cfg', 'tox.ini',]
+initialize(FILES, error=True,)
+\end{python}
+\section{Comments}
+Comments that contradict the code are worse than no comments. Always make a 
+priority of keeping the comments up-to-date when the code changes!
+\par
+Comments should be complete sentences. The first word should be capitalized, 
+unless it is an identifier that begins with a lower case letter (never alter 
+the case of identifiers!).
+\par
+Block comments generally consist of one or more paragraphs built out of 
+complete sentences, with each sentence ending in a period.
+\par
+You should use one or two spaces after a sentence-ending period in 
+multi-sentence comments, except after the final sentence.
+\par
+Ensure that your comments are clear and easily understandable to other 
+speakers of the language you are writing in.
+\par
+Python coders from non-English speaking countries: please write your comments 
+in English, unless you are 120\% sure that the code will never be read by 
+people who don’t speak your language.
+\subsection{Block Comments}
+Block comments generally apply to some (or all) code that follows them, and 
+are indented to the same level as that code. Each line of a block comment 
+starts with a \# and a single space (unless it is indented text inside the 
+comment).
+\par
+Paragraphs inside a block comment are separated by a line containing a single 
+\#.
+\subsection{Inline Comments}
+Use inline comments sparingly.
+\par
+An inline comment is a comment on the same line as a statement. Inline 
+comments should be separated by at least two spaces from the statement. They 
+should start with a \# and a single space.
+\par
+Inline comments are unnecessary and in fact distracting if they state the 
+obvious. Don’t do this:
+\par
+\begin{python}
+x = x + 1                 # Increment x
+\end{python}
+But sometimes, this is useful:
+\par
+\begin{python}
+x = x + 1                 # Compensate for border
+\end{python}
+\subsection{Documentation Strings}
+Conventions for writing good documentation strings (a.k.a. “docstrings”) are
+immortalized in
+\href{https://peps.python.org/pep-0257/}{PEP 257}.
+\par
+\begin{itemize}
+\item Write docstrings for all public modules, functions, classes, and methods.
+Docstrings are not necessary for non-public methods, but you should have a 
+comment that describes what the method does. This comment should appear after 
+the \verb"def" line.
+\item
+\href{https://peps.python.org/pep-0257/}{PEP 257} describes good docstring
+conventions. Note that most importantly, the \verb!"""! that ends a multiline
+docstring should be on a line by itself:
+\begin{python}
+"""Return a foobang
+
+Optional plotz says to frobnicate the bizbaz first.
+"""
+\end{python}
+\item For one liner docstrings, please keep the closing \verb!"""! on the same
+line:
+\begin{python}
+"""Return an ex-parrot."""
+\end{python}
+\end{itemize}
+\section{Naming Conventions}
+The naming conventions of Python’s library are a bit of a mess, so we’ll 
+never get this completely consistent – nevertheless, here are the currently 
+recommended naming standards. New modules and packages (including third party 
+frameworks) should be written to these standards, but where an existing 
+library has a different style, internal consistency is preferred.
+\par
+\subsection{Overriding Principle}
+Names that are visible to the user as public parts of the API should follow
+conventions that reflect usage rather than implementation.
+\par
+\subsection{Descriptive: Naming Styles}
+There are a lot of different naming styles. It helps to be able to recognize 
+what naming style is being used, independently from what they are used for.
+\par
+The following naming styles are commonly distinguished:
+\begin{itemize}
+\item \verb"b" (single lowercase letter)
+\item \verb"B" (single uppercase letter)
+\item \verb"lowercase"
+\item \verb"lower_case_with_underscores"
+\item \verb"UPPERCASE"
+\item \verb"UPPER_CASE_WITH_UNDERSCORES"
+\item \verb"CapitalizedWords" (or CapWords, or CamelCase – so named because of
+the bumpy look of its letters
+\footnote{\href{http://www.wikipedia.com/wiki/CamelCase}
+{\bf{http://www.wikipedia.com/wiki/CamelCase}}}). This is also
+sometimes known as StudlyCaps.
+\par
+Note: When using acronyms in CapWords, capitalize all the letters of the 
+acronym. Thus HTTPServerError is better than HttpServerError.
+\item \verb"mixedCase" (differs from CapitalizedWords by initial lowercase
+character!)
+\item \verb"Capitalized_Words_With_Underscores" (ugly!)
+\end{itemize}
+There’s also the style of using a short unique prefix to group related names 
+together. This is not used much in Python, but it is mentioned for 
+completeness. For example, the \verb"os.stat()" function returns a tuple 
+whose items traditionally have names like \verb"st_mode", \verb"st_size", 
+\verb"st_mtime" and so on. (This is done to emphasize the correspondence with 
+the fields of the POSIX system call struct, which helps programmers familiar 
+with that.)
+\par
+The X11 library uses a leading X for all its public functions. In Python, 
+this style is generally deemed unnecessary because attribute and method names 
+are prefixed with an object, and function names are prefixed with a module 
+name.
+\par
+In addition, the following special forms using leading or trailing 
+underscores are recognized (these can generally be combined with any case 
+convention):
+\begin{itemize}
+\item \verb"_single_leading_underscoref": weak “internal use” indicator. E.g. 
+\verb"from M import *" does not import objects whose names start with an 
+underscore.
+\item \verb"single_trailing_underscore_": used by convention to avoid 
+conflicts with Python keyword, e.g. :
+\begin{python}
+tkinter.Toplevel(master, class_='ClassName')
+\end{python}
+\item \verb"__double_leading_underscore": when naming a class attribute, 
+invokes name mangling (inside class FooBar, \verb"__boo" becomes 
+\verb"_FooBar__boo"; see below).
+\item \verb"__double_leading_and_trailing_underscore__": “magic” objects or 
+attributes that live in user-controlled namespaces. E.g. \verb"__init__", 
+\verb"__import__" or \verb"__file__". Never invent such names; only use them 
+as documented.
+\end{itemize}
+\subsection{Prescriptive: Naming Conventions}
+\subsubsection{Names to Avoid}
+Never use the characters ‘l’ (lowercase letter el), ‘O’ (uppercase letter 
+oh), or ‘I’ (uppercase letter eye) as single character variable names.
+\par
+In some fonts, these characters are indistinguishable from the numerals one 
+and zero. When tempted to use ‘l’, use ‘L’ instead.
+\subsubsection{ACII Compatibility}
+Identifiers used in the standard library must be ASCII compatible as described
+in the
+\href{https://peps.python.org/pep-3131/#policy-specification}{policy section} of
+\href{https://peps.python.org/pep-3131/}{PEP 3131}.
+\subsubsection{Package and Module Names}
+Modules should have short, all-lowercase names. Underscores can be used in 
+the module name if it improves readability. Python packages should also have 
+short, all-lowercase names, although the use of underscores is discouraged.
+\par
+When an extension module written in C or C++ has an accompanying Python 
+module that provides a higher level (e.g. more object oriented) interface, 
+the C/C++ module has a leading underscore (e.g. \verb"_socket").
+\subsubsection{Class Names}
+Class names should normally use the CapWords convention.
+\par
+The naming convention for functions may be used instead in cases where the 
+interface is documented and used primarily as a callable.
+\par
+Note that there is a separate convention for builtin names: most builtin 
+names are single words (or two words run together), with the CapWords 
+convention used only for exception names and builtin constants.
+\subsubsection{Type Variable Names}
+Names of type variables introduced in 
+\href{https://peps.python.org/pep-0484/}{PEP 484} should normally use 
+CapWords preferring short names: \verb"T", \verb"AnyStr", \verb"Num". It is 
+recommended to add suffixes \verb"_co" or \verb"_contra" to the variables 
+used to declare covariant or contravariant behavior correspondingly:
+\begin{python}
+from typing import TypeVar
+
+VT_co = TypeVar('VT_co', covariant=True)
+KT_contra = TypeVar('KT_contra', contravariant=True)
+\end{python}
+\subsubsection{Exception Names}
+Because exceptions should be classes, the class naming convention applies 
+here. However, you should use the suffix “Error” on your exception names (if 
+the exception actually is an error).
+\subsubsection{Global Variable Names}
+(Let’s hope that these variables are meant for use inside one module only.) 
+The conventions are about the same as those for functions.
+\par
+Modules that are designed for use via \verb"from M import *" should use the 
+\verb"__all__" mechanism to prevent exporting globals, or use the older 
+convention of prefixing such globals with an underscore (which you might want 
+to do to indicate these globals are “module non-public”).
+\subsubsection{Function and Variable Names}
+Function names should be lowercase, with words separated by underscores as 
+necessary to improve readability.
+\par
+Variable names follow the same convention as function names.
+\par
+mixedCase is allowed only in contexts where that’s already the prevailing 
+style (e.g. threading.py), to retain backwards compatibility.
+\subsubsection{Function and Method Arguments}
+Always use \verb"self" for the first argument to instance methods.
+\par
+Always use \verb"cls" for the first argument to class methods.
+\par
+If a function argument’s name clashes with a reserved keyword, it is 
+generally better to append a single trailing underscore rather than use an 
+abbreviation or spelling corruption. Thus \verb"class_" is better than 
+\verb"clss". (Perhaps better is to avoid such clashes by using a synonym.)
+\subsubsection{Method Names and Instance Variables}
+Use the function naming rules: lowercase with words separated by underscores 
+as necessary to improve readability.
+\par
+Use one leading underscore only for non-public methods and instance variables.
+\par
+To avoid name clashes with subclasses, use two leading underscores to invoke 
+Python’s name mangling rules.
+\par
+Python mangles these names with the class name: if class Foo has an attribute 
+named \verb"__a", it cannot be accessed by \verb"Foo.__a". (An insistent user 
+could still gain access by calling \verb"Foo._Foo__a".) Generally, double 
+leading underscores should be used only to avoid name conflicts with 
+attributes in classes designed to be subclassed.
+\par
+Note: there is some controversy about the use of \verb"__names" (see below).
+\subsubsection{Constants}
+Constants are usually defined on a module level and written in all capital 
+letters with underscores separating words. Examples include 
+\verb"MAX_OVERFLOW" and \verb"TOTAL".
+\subsubsection{Designing for Inheritance}
+Always decide whether a class’s methods and instance variables (collectively: 
+“attributes”) should be public or non-public. If in doubt, choose non-public; 
+it’s easier to make it public later than to make a public attribute 
+non-public.
+\par
+Public attributes are those that you expect unrelated clients of your class 
+to use, with your commitment to avoid backwards incompatible changes. 
+Non-public attributes are those that are not intended to be used by third 
+parties; you make no guarantees that non-public attributes won’t change or 
+even be removed.
+\par
+We don’t use the term “private” here, since no attribute is really private in 
+Python (without a generally unnecessary amount of work).
+\par
+Another category of attributes are those that are part of the “subclass API” 
+(often called “protected” in other languages). Some classes are designed to 
+be inherited from, either to extend or modify aspects of the class’s 
+behavior. When designing such a class, take care to make explicit decisions 
+about which attributes are public, which are part of the subclass API, and 
+which are truly only to be used by your base class.
+\par
+With this in mind, here are the Pythonic guidelines:
+\begin{itemize}
+\item Public attributes should have no leading underscores.
+\item If your public attribute name collides with a reserved keyword, append 
+a single trailing underscore to your attribute name. This is preferable to an 
+abbreviation or corrupted spelling. (However, notwithstanding this rule, 
+‘cls’ is the preferred spelling for any variable or argument which is known 
+to be a class, especially the first argument to a class method.)
+\par
+Note 1: See the argument name recommendation above for class methods.
+\item For simple public data attributes, it is best to expose just the 
+attribute name, without complicated accessor/mutator methods. Keep in mind 
+that Python provides an easy path to future enhancement, should you find that 
+a simple data attribute needs to grow functional behavior. In that case, use 
+properties to hide functional implementation behind simple data attribute 
+access syntax.
+\par
+Note 1: Try to keep the functional behavior side-effect free, although 
+side-effects such as caching are generally fine.
+\par
+Note 2: Avoid using properties for computationally expensive operations; the 
+attribute notation makes the caller believe that access is (relatively) cheap.
+\item If your class is intended to be subclassed, and you have attributes 
+that you do not want subclasses to use, consider naming them with double 
+leading underscores and no trailing underscores. This invokes Python’s name 
+mangling algorithm, where the name of the class is mangled into the attribute 
+name. This helps avoid attribute name collisions should subclasses 
+inadvertently contain attributes with the same name.
+\par
+Note 1: Note that only the simple class name is used in the mangled name, so 
+if a subclass chooses both the same class name and attribute name, you can 
+still get name collisions.
+\par
+Note 2: Name mangling can make certain uses, such as debugging and 
+\verb"__getattr__()", less convenient. However the name mangling algorithm is 
+well documented and easy to perform manually.
+\par
+Note 3: Not everyone likes name mangling. Try to balance the need to avoid 
+accidental name clashes with potential use by advanced callers.
+\end{itemize}
+\subsection{Public and Internal Interfaces}
+Any backwards compatibility guarantees apply only to public interfaces. 
+Accordingly, it is important that users be able to clearly distinguish 
+between public and internal interfaces.
+\par
+Documented interfaces are considered public, unless the documentation 
+explicitly declares them to be provisional or internal interfaces exempt from 
+the usual backwards compatibility guarantees. All undocumented interfaces 
+should be assumed to be internal.
+\par
+To better support introspection, modules should explicitly declare the names 
+in their public API using the \verb"__all__" attribute. Setting 
+\verb"__all__" to an empty list indicates that the module has no public API.
+\par
+Even with \verb"__all__" set appropriately, internal interfaces (packages, 
+modules, classes, functions, attributes or other names) should still be 
+prefixed with a single leading underscore.
+\par
+An interface is also considered internal if any containing namespace 
+(package, module or class) is considered internal.
+\par
+Imported names should always be considered an implementation detail. Other 
+modules must not rely on indirect access to such imported names unless they 
+are an explicitly documented part of the containing module’s API, such as 
+\verb"os.path" or a package’s \verb"__init__" module that exposes 
+functionality from submodules.
+\section{Programming Recommendations}
+\begin{itemize}
+\item Code should be written in a way that does not disadvantage other 
+implementations of Python (PyPy, Jython, IronPython, Cython, Psyco, and such).
+\par
+For example, do not rely on CPython’s efficient implementation of in-place 
+string concatenation for statements in the form \verb"a += b" or \verb"a = a + b".
+This optimization is fragile even in CPython (it only works for some 
+types) and isn’t present at all in implementations that don’t use 
+refcounting. In performance sensitive parts of the library, the 
+\verb!''.join()! form should be used instead. This will ensure that
+concatenation occurs in linear time across various implementations.
+\item Comparisons to singletons like None should always be done with 
+\verb"is" or \verb"is not", never the equality operators.
+\par
+Also, beware of writing \verb"if x" when you really mean 
+\verb"if x is not None" – e.g. when testing whether a variable or argument 
+that defaults to None was set to some other value. The other value might have 
+a type (such as a container) that could be false in a boolean context!
+\item Use is not operator rather than \verb"not ... is". While both 
+expressions are functionally identical, the former is more readable and 
+preferred:
+\begin{python}
+# Correct:
+if foo is not None:
+\end{python}
+\begin{python}
+# Wrong:
+if not foo is None:e
+\end{python}
+\item When implementing ordering operations with rich comparisons, it is best 
+to implement all six operations (\verb"__eq__", \verb"__ne__", \verb"__lt__", 
+\verb"__le__", \verb"__gt__", \verb"__ge__") rather than relying on other 
+code to only exercise a particular comparison.
+\par
+To minimize the effort involved, the \verb"functools.total_ordering()" 
+decorator provides a tool to generate missing comparison methods.
+\par
+\href{https://peps.python.org/pep-0207/}{PEP 207} indicates that reflexivity 
+rules are assumed by Python. Thus, the interpreter may swap \verb"y > x" with 
+\verb"x < y", \verb"y >= x" with \verb"x <= y", and may swap the arguments of 
+\verb"x == y" and \verb"x != y". The \verb"sort()" and \verb"min()" 
+operations are guaranteed to use the \verb"<" operator and the \verb"max()" 
+function uses the \verb">" operator. However, it is best to implement all six 
+operations so that confusion doesn’t arise in other contexts.
+\item Always use a def statement instead of an assignment statement that 
+binds a lambda expression directly to an identifier:
+\begin{python}
+# Correct:
+def f(x): return 2*x
+\end{python}
+\begin{python}
+# Wrong:
+f = lambda x: 2*x
+\end{python}
+The first form means that the name of the resulting function object is 
+specifically ‘f’ instead of the generic ‘<lambda>’. This is more useful for 
+tracebacks and string representations in general. The use of the assignment 
+statement eliminates the sole benefit a lambda expression can offer over an 
+explicit def statement (i.e. that it can be embedded inside a larger 
+expression)
+\item Derive exceptions from \verb"Exception" rather than 
+\verb"BaseException". Direct inheritance from \verb"BaseException" is 
+reserved for exceptions where catching them is almost always the wrong thing 
+to do.
+\par
+Design exception hierarchies based on the distinctions that code 
+{\it catching} the exceptions is likely to need, rather than the locations 
+where the exceptions are raised. Aim to answer the question “What went 
+wrong?” programmatically, rather than only stating that “A problem occurred” 
+(see \href{https://peps.python.org/pep-3151/}{PEP 3151} for an example of 
+this lesson being learned for the builtin exception hierarchy)
+\par
+Class naming conventions apply here, although you should add the suffix 
+“Error” to your exception classes if the exception is an error. Non-error 
+exceptions that are used for non-local flow control or other forms of 
+signaling need no special suffix.
+\item Use exception chaining appropriately. \verb"raise X from Y" should be 
+used to indicate explicit replacement without losing the original traceback.
+\par
+When deliberately replacing an inner exception (using 
+\verb"raise X from None"), ensure that relevant details are transferred to 
+the new exception (such as preserving the attribute name when converting 
+KeyError to AttributeError, or embedding the text of the original exception 
+in the new exception message).
+\item When catching exceptions, mention specific exceptions whenever possible 
+instead of using a bare \verb"except": clause:
+\begin{python}
+try:
+    import platform_specific_module
+except ImportError:
+    platform_specific_module = None
+\end{python}
+A bare \verb"except": clause will catch SystemExit and KeyboardInterrupt 
+exceptions, making it harder to interrupt a program with Control-C, and can 
+disguise other problems. If you want to catch all exceptions that signal 
+program errors, use \verb"except Exception": (bare except is equivalent to 
+\verb"except BaseException":).
+\par
+A good rule of thumb is to limit use of bare ‘except’ clauses to two cases:
+\begin{enumerate}
+\item If the exception handler will be printing out or logging the traceback; 
+at least the user will be aware that an error has occurred.
+\item If the code needs to do some cleanup work, but then lets the exception 
+propagate upwards with \verb"raise". \verb"try...finally" can be a better way 
+to handle this case.
+\end{enumerate}
+\item When catching operating system errors, prefer the explicit exception 
+hierarchy introduced in Python 3.3 over introspection of \verb"errno" values.
+\item Additionally, for all try/except clauses, limit the \verb"try" clause 
+to the absolute minimum amount of code necessary. Again, this avoids masking 
+bugs:
+\begin{python}
+# Correct:
+try:
+    value = collection[key]
+except KeyError:
+    return key_not_found(key)
+else:
+    return handle_value(value)
+\end{python}
+\begin{python}
+# Wrong:
+try:
+    # Too broad!
+    return handle_value(collection[key])
+except KeyError:
+    # Will also catch KeyError raised by handle_value()
+    return key_not_found(key)
+\end{python}
+\item When a resource is local to a particular section of code, use a 
+\verb"with" statement to ensure it is cleaned up promptly and reliably after 
+use. A try/finally statement is also acceptable.
+\item Context managers should be invoked through separate functions or 
+methods whenever they do something other than acquire and release resources:
+\begin{python}
+# Correct:
+with conn.begin_transaction():
+    do_stuff_in_transaction(conn)
+\end{python}
+\begin{python}
+# Wrong:
+with conn:
+    do_stuff_in_transaction(conn)
+\end{python}
+The latter example doesn’t provide any information to indicate that the 
+\verb"__enter__" and \verb"__exit__" methods are doing something other than 
+closing the connection after a transaction. Being explicit is important in 
+this case.
+\item Be consistent in return statements. Either all return statements in a 
+function should return an expression, or none of them should. If any return 
+statement returns an expression, any return statements where no value is 
+returned should explicitly state this as \verb"return None", and an explicit 
+return statement should be present at the end of the function (if reachable):
+\begin{python}
+# Correct:
+
+def foo(x):
+    if x >= 0:
+        return math.sqrt(x)
+    else:
+        return None
+
+def bar(x):
+    if x < 0:
+        return None
+    return math.sqrt(x)
+\end{python}
+\begin{python}
+# Wrong:
+
+def foo(x):
+    if x >= 0:
+        return math.sqrt(x)
+
+def bar(x):
+    if x < 0:
+        return
+    return math.sqrt(x)
+\end{python}
+\item Use \verb!''.startswith()! and \verb!''.endswith()! instead of string 
+slicing to check for prefixes or suffixes. startswith() and endswith() are 
+cleaner and less error prone:
+\begin{python}
+# Correct:
+if foo.startswith('bar'):
+\end{python}
+\begin{python}
+# Wrong:
+if foo[:3] == 'bar':
+\end{python}
+\item Object type comparisons should always use isinstance() instead of 
+comparing types directly:
+\begin{python}
+# Correct:
+if isinstance(obj, int):
+\end{python}
+\begin{python}
+# Wrong:
+if type(obj) is type(1):
+\end{python}
+\item For sequences, (strings, lists, tuples), use the fact that empty 
+sequences are false:
+\begin{python}
+# Correct:
+if not seq:
+if seq:
+\end{python}
+\begin{python}
+# Wrong:
+if len(seq):
+if not len(seq):
+\end{python}
+\item Don’t write string literals that rely on significant trailing 
+whitespace. Such trailing whitespace is visually indistinguishable and some 
+editors (or more recently, reindent.py) will trim them.
+\item Don’t compare boolean values to True or False using ==:
+\begin{python}
+# Correct:
+if greeting:
+\end{python}
+\begin{python}
+# Wrong:
+if greeting == True:
+\end{python}
+Worse:
+\begin{python}
+# Wrong:
+if greeting is True:
+\end{python}
+\item Use of the flow control statements 
+\verb"return"/\verb"break"/\verb"continue" within the finally suite of a 
+\verb"try...finally", where the flow control statement would jump outside the 
+finally suite, is discouraged. This is because such statements will 
+implicitly cancel any active exception that is propagating through the 
+finally suite:
+\begin{python}
+# Wrong:
+def foo():
+    try:
+        1 / 0
+    finally:
+        return 42
+\end{python}
+\end{itemize}
+\subsection{Function Annotations}
+\label{sec:function_annotations}
+With the acceptance of \href{https://peps.python.org/pep-0484/}{PEP 484}, the 
+style rules for function annotations have changed.
+\begin{itemize}
+\item Function annotations should use PEP 484 syntax (there are some 
+formatting recommendations for annotations in the previous section).
+\item The experimentation with annotation styles that was recommended 
+previously in this PEP is no longer encouraged.
+\item However, outside the stdlib, experiments within the rules of PEP 484 
+are now encouraged. For example, marking up a large third party library or 
+application with PEP 484 style type annotations, reviewing how easy it was to 
+add those annotations, and observing whether their presence increases code 
+understandability.
+\item The Python standard library should be conservative in adopting such 
+annotations, but their use is allowed for new code and for big refactorings.
+\item For code that wants to make a different use of function annotations it 
+is recommended to put a comment of the form:
+\begin{python}
+# type: ignore
+\end{python}
+near the top of the file; this tells type checkers to ignore all annotations. 
+(More fine-grained ways of disabling complaints from type checkers can be 
+found in PEP 484.)
+\item Like linters, type checkers are optional, separate tools. Python 
+interpreters by default should not issue any messages due to type checking 
+and should not alter their behavior based on annotations.
+\item Users who don’t want to use type checkers are free to ignore them. 
+However, it is expected that users of third party library packages may want 
+to run type checkers over those packages. For this purpose PEP 484 recommends 
+the use of stub files: .pyi files that are read by the type checker in 
+preference of the corresponding .py files. Stub files can be distributed with 
+a library, or separately (with the library author’s permission) through the 
+typeshed repo \footnote{Typeshed repo
+\href{https://github.com/python/typeshed}{https://github.com/python/typeshed}}
+\end{itemize}
+\subsection{Variable Annotations}
+\href{https://peps.python.org/pep-0526/}{PEP 526} introduced variable 
+annotations. The style recommendations for them are similar to those on 
+function annotations described above:
+\begin{itemize}
+\item Annotations for module level variables, class and instance variables, 
+and local variables should have a single space after the colon.
+\item There should be no space before the colon.
+\item If an assignment has a right hand side, then the equality sign should 
+have exactly one space on both sides:
+\begin{python}
+# Correct:
+
+code: int
+
+class Point:
+    coords: Tuple[int, int]
+    label: str = '<unknown>'
+\end{python}
+\begin{python}
+# Wrong:
+
+code:int  # No space after colon
+code : int  # Space before colon
+
+class Test:
+    result: int=0  # No spaces around equality sign
+\end{python}
+\item Although the \href{https://peps.python.org/pep-0526/}{PEP 526} is 
+accepted for Python 3.6, the variable annotation syntax is the preferred 
+syntax for stub files on all versions of Python (see 
+\href{https://peps.python.org/pep-0484/}{PEP 484} for details).
+\end{itemize}
+\section{Copyright}
+This document has been placed in the public domain.
+\par
+Source: \href{https://github.com/python/peps/blob/main/peps/pep-0008.rst}{Github}
+%
+\begin{thebibliography}{000}
+\bibitem{Warsaw-Style}
+\newblock Barry Warsaw
+\newblock GNU Mailman Coding Style Guide
+\newblock \href{https://barry.warsaw.us/software/STYLEGUIDE.txt}
+{https://barry.warsaw.us/software/STYLEGUIDE.txt}
+\bibitem{Knuth-1986}
+\newblock Donald Knuth
+\newblock The TeXBook, 1986
+\newblock pages 195 and 196
+\end{thebibliography}
+%
+\end{document}
